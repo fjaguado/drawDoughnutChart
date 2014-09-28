@@ -28,7 +28,7 @@
         percentageInnerCutout : 70,
         animation : true,
         animationSteps : 90,
-        animationEasing : "easeInOutExpo",
+        animationEasing : "linear",
         animateRotate : true,
         tipOffsetX: -8,
         tipOffsetY: -45,
@@ -167,7 +167,8 @@
 
       //drawDoughnutText(animationDecimal, segmentTotal);
 
-      $pathGroup.attr("opacity", animationDecimal);
+      //$pathGroup.attr("opacity", animationDecimal);
+      $pathGroup.attr("opacity", 1);
 
       //If data have only one value, we draw hollow circle(#1).
       if (data.length === 1 && (4.7122 < (rotateAnimation * ((data[0].value / segmentTotal) * (PI * 2)) + startRadius))) {
