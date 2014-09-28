@@ -12,27 +12,27 @@
   $.fn.drawDoughnutChart = function(data, options) {
     var $this = this,
       W = $this.width(),
-      H = $this.height(),
+      H = $this.height() * 2,
       centerX = W/2,
-      centerY = H/2,
+      centerY = H,
       cos = Math.cos,
       sin = Math.sin,
       PI = Math.PI,
       settings = $.extend({
         segmentShowStroke : true,
         segmentStrokeColor : "#0C1013",
-        segmentStrokeWidth : 1,
-        baseColor: "rgba(0,0,0,0.5)",
-        baseOffset: 4,
+        segmentStrokeWidth : 0,
+        baseColor: "rgba(252,241,209,1)",
+        baseOffset: 0,
         edgeOffset : 10,//offset from edge of $this
-        percentageInnerCutout : 75,
+        percentageInnerCutout : 70,
         animation : true,
         animationSteps : 90,
         animationEasing : "easeInOutExpo",
         animateRotate : true,
         tipOffsetX: -8,
         tipOffsetY: -45,
-        showTip: true,
+        showTip: false,
         showLabel: false,
         ratioFont: 1.5,
         shortInt: false,
@@ -95,21 +95,6 @@
           tipW = $tip.width(),
           tipH = $tip.height();
     }
-
-    //Set up center text area
-    var summarySize = (cutoutRadius - (doughnutRadius - cutoutRadius)) * 2,
-        $summary = $('<div class="' + settings.summaryClass + '" />')
-                   .appendTo($this)
-                   .css({
-                     width: summarySize + "px",
-                     height: summarySize + "px",
-                     "margin-left": -(summarySize / 2) + "px",
-                     "margin-top": -(summarySize / 2) + "px"
-                   });
-    var $summaryTitle = $('<p class="' + settings.summaryTitleClass + '">' + settings.summaryTitle + '</p>').appendTo($summary);
-    $summaryTitle.css('font-size', getScaleFontSize( $summaryTitle, settings.summaryTitle )); // In most of case useless
-    var $summaryNumber = $('<p class="' + settings.summaryNumberClass + '"></p>').appendTo($summary).css({opacity: 0});
-
     for (var i = 0, len = data.length; i < len; i++) {
       segmentTotal += data[i].value;
       $paths[i] = $(document.createElementNS('http://www.w3.org/2000/svg', 'path'))
@@ -157,24 +142,9 @@
     };
     function pathMouseEnter(e) {
       var order = $(this).data().order;
-      if (settings.showTip) {
-        $tip.text(data[order].title + ": " + data[order].value)
-            .fadeIn(200);
-      }
-      if(settings.showLabel) {
-		  $summaryTitle.text(data[order].title).css('font-size', getScaleFontSize( $summaryTitle, data[order].title));
-          var tmpNumber = settings.shortInt ? shortKInt(data[order].value) : data[order].value;
-		  $summaryNumber.html(tmpNumber).css('font-size', getScaleFontSize( $summaryNumber, tmpNumber));
-	  }
       settings.onPathEnter.apply($(this),[e,data]);
     }
     function pathMouseLeave(e) {
-      if (settings.showTip) $tip.hide();
-      if(settings.showLabel) {
-		  $summaryTitle.text(settings.summaryTitle).css('font-size', getScaleFontSize( $summaryTitle, settings.summaryTitle));
-          var tmpNumber = settings.shortInt ? shortKInt(segmentTotal) : segmentTotal;
-		  $summaryNumber.html(tmpNumber).css('font-size', getScaleFontSize( $summaryNumber, tmpNumber));
-	  }
       settings.onPathLeave.apply($(this),[e,data]);
     }
     function pathMouseMove(e) {
@@ -191,11 +161,11 @@
 		  data[order].action();
 	}
     function drawPieSegments (animationDecimal) {
-      var startRadius = -PI / 2,//-90 degree
+      var startRadius = -PI,//-90 degree
           rotateAnimation = 1;
       if (settings.animation && settings.animateRotate) rotateAnimation = animationDecimal;//count up between0~1
 
-      drawDoughnutText(animationDecimal, segmentTotal);
+      //drawDoughnutText(animationDecimal, segmentTotal);
 
       $pathGroup.attr("opacity", animationDecimal);
 
@@ -226,13 +196,6 @@
         $paths[i].attr("d", cmd.join(' '));
         startRadius += segmentAngle;
       }
-    }
-    function drawDoughnutText(animationDecimal, segmentTotal) {
-      $summaryNumber
-        .css({opacity: animationDecimal})
-        .text((segmentTotal * animationDecimal).toFixed(1));
-	  var tmpNumber = settings.shortInt ? shortKInt(segmentTotal) : segmentTotal;
-	  $summaryNumber.html(tmpNumber).css('font-size', getScaleFontSize( $summaryNumber, tmpNumber));
     }
     function animateFrame(cnt, drawData) {
       var easeAdjustedAnimationPercent =(settings.animation)? CapValue(easingFunction(cnt), null, 0) : 1;
